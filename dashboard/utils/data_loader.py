@@ -39,7 +39,9 @@ def load_data():
         return df
 
     except Exception as e:
-        # Fallback for demo purposes if MinIO fails (Optional)
-        st.error(f"Connection Error: {str(e)}")
-        # Return empty dataframe to prevent crash
-        return pd.DataFrame()
+        # Fallback for Streamlit Cloud or offline mode
+        try:
+            return pd.read_parquet("dashboard/data/sample_data.parquet")
+        except FileNotFoundError:
+            st.error("MinIO is unreachable and no offline data found.")
+            return pd.DataFrame()
