@@ -1,0 +1,6 @@
+streamlit
+pandas
+minio
+pyarrow
+plotly
+watchdog
