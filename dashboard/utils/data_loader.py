@@ -32,16 +32,20 @@ def load_data():
         data = BytesIO(response.read())
         df = pd.read_parquet(data)
         
-        # Ensure datetime conversion
+        # Ensure datetime conversion from Unix timestamp
         if 'created_utc' in df.columns:
-            df['created_utc'] = pd.to_datetime(df['created_utc'])
+            df['created_utc'] = pd.to_datetime(df['created_utc'], unit='s')
             
         return df
 
     except Exception as e:
         # Fallback for Streamlit Cloud or offline mode
         try:
-            return pd.read_parquet("dashboard/data/sample_data.parquet")
+            df = pd.read_parquet("dashboard/data/sample_data.parquet")
+            # Apply same datetime conversion for fallback data
+            if 'created_utc' in df.columns:
+                df['created_utc'] = pd.to_datetime(df['created_utc'], unit='s')
+            return df
         except FileNotFoundError:
             st.error("MinIO is unreachable and no offline data found.")
             return pd.DataFrame()

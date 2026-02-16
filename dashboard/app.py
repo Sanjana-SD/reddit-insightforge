@@ -35,8 +35,11 @@ with st.sidebar:
         
         # Date Filter
         if 'created_utc' in df.columns:
-            min_date = df['created_utc'].min().date()
-            max_date = df['created_utc'].max().date()
+            # Convert to datetime if not already
+            if not pd.api.types.is_datetime64_any_dtype(df['created_utc']):
+                df['created_utc'] = pd.to_datetime(df['created_utc'], unit='s')
+            min_date = pd.Timestamp(df['created_utc'].min()).date()
+            max_date = pd.Timestamp(df['created_utc'].max()).date()
             date_range = st.date_input("Date Range", [min_date, max_date])
         
         # Min Posts Slider
@@ -87,12 +90,12 @@ st.markdown("---")
 col_left, col_right = st.columns([2, 1])
 
 with col_left:
-    st.plotly_chart(charts.chart_posts_over_time(filtered_df), use_container_width=True)
-    st.plotly_chart(charts.chart_posts_per_subreddit(filtered_df), use_container_width=True)
+    st.plotly_chart(charts.chart_posts_over_time(filtered_df))
+    st.plotly_chart(charts.chart_posts_per_subreddit(filtered_df))
 
 with col_right:
-    st.plotly_chart(charts.chart_subreddit_distribution(filtered_df), use_container_width=True)
-    st.plotly_chart(charts.chart_top_active(filtered_df), use_container_width=True)
+    st.plotly_chart(charts.chart_subreddit_distribution(filtered_df))
+    st.plotly_chart(charts.chart_top_active(filtered_df))
 
 # Insights Panel
 st.markdown("### 🧠 Automated Insights")
@@ -103,7 +106,7 @@ for i, insight in enumerate(insight_list):
 
 # Data Explorer
 with st.expander("📂 Data Explorer & Export"):
-    st.dataframe(filtered_df, use_container_width=True)
+    st.dataframe(filtered_df)
     csv = filtered_df.to_csv(index=False).encode('utf-8')
     st.download_button(
         "Download CSV",
